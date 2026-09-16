@@ -58,7 +58,10 @@ void ShutdownGame(void) {
         logEvent(LT_SERVEREND, 0, NULL, NULL, 0, 0.0, true);
         profile_start(2);
     }
+    if (finalentities) {
     G_Free(finalentities);
+    finalentities = NULL;
+    }
     CA_Shutdown();
 
     lrcon_reset_rcon_password(0, 0, 0);
