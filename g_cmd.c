@@ -1514,7 +1514,7 @@ void dprintf_internal(char *fmt, ...) {
 
     if (clienti != -1) {
         if (checkForMute(clienti, getEnt((clienti + 1)), true)) {
-            q2a_strncpy(mutedText, cbuffer, sizeof(mutedText)-1);
+            Q_strlcpy(mutedText, cbuffer, sizeof(mutedText));
             return;
         }
 
@@ -1623,7 +1623,8 @@ void cprintf_internal(edict_t *ent, int printlevel, char *fmt, ...) {
             chatpest_t *pest = &proxyinfo[clienti].pest;
             pest->printchars += strlen(cbuffer) - 1; // don't count the trailing \n
             pest->chatrate = pest->printchars / (ltime - proxyinfo[clienti].enteredgame);
-            q2a_strncpy(pest->last[pest->last_index], cbuffer, MAX_CHAT_CHARS);
+            Q_strlcpy(pest->last[pest->last_index], cbuffer,
+                    sizeof(pest->last[pest->last_index]));
             if (pest->last_index == (MSG_SAVE_COUNT - 1)) {
                 pest->last_index = -1;
             }
@@ -1787,7 +1788,7 @@ void AddCommandString_internal(char *text) {
         }
     }
 
-    q2a_strncpy(buffer, text, sizeof(buffer)-1);
+    Q_strlcpy(buffer, text, sizeof(buffer));
     q_strupr(buffer);
 
     str = q2a_strstr(buffer, "GAMEMAP");
@@ -2103,7 +2104,7 @@ int getClientsFromArg(int client, edict_t *ent, char *cp, char **text) {
             if (proxyinfo[clienti].inuse) {
                 switch (like) {
                     case 0: // name
-                        q2a_strncpy(strbuffer2, strbuffer, sizeof(strbuffer2) - 1);
+                        Q_strlcpy(strbuffer2, strbuffer, sizeof(strbuffer2));
                         if (wildcard_match(strbuffer2, proxyinfo[clienti].name)) {
                             numfound++;
                             proxyinfo[clienti].clientcommand |= CCMD_SELECTED;
@@ -2233,7 +2234,7 @@ edict_t *getClientFromArg(int client, edict_t *ent, int *clientret, char *cp, ch
             if (proxyinfo[clienti].inuse) {
                 switch (like) {
                     case 0: // name
-                        q2a_strncpy(strbuffer2, strbuffer, sizeof(strbuffer2) - 1);
+                        Q_strlcpy(strbuffer2, strbuffer, sizeof(strbuffer2));
                         if (wildcard_match(strbuffer2, proxyinfo[clienti].name)) {
                             foundclienti = clienti;
                             matchcount++;
@@ -2543,6 +2544,32 @@ void hackDetected(edict_t *ent, int client) {
 }
 
 /**
+ * Block known vulnerable commands before an older game mod can copy their
+ * arguments into undersized buffers. Ported from the TastySpleen/R1CH branch.
+ */
+static bool clientCommandIsModExploit(edict_t *ent) {
+    char *cmd = gi.argv(0);
+    int max_length = 0;
+
+    if (Q_stricmp(cmd, "teamskin") == 0) {
+        max_length = 127;
+    } else if (Q_stricmp(cmd, "kickplayer") == 0
+            || Q_stricmp(cmd, "removeplayer") == 0
+            || Q_stricmp(cmd, "remove") == 0) {
+        max_length = 20;
+    }
+
+    if (max_length && (int) strlen(gi.args()) > max_length) {
+        gi.cprintf(ent, PRINT_HIGH,
+                "Error: Arguments to %s must not exceed %d characters.\n",
+                cmd, max_length);
+        return true;
+    }
+
+    return false;
+}
+
+/**
  * doClientCommand is called from ClientComand() for every command from
  * clients. The primary purpose of this func is to catch text from the client
  * and process it as part of the detection and control functionality.
@@ -2567,6 +2594,10 @@ bool doClientCommand(edict_t *ent, int client, bool *checkforfloodafter) {
     char text[2048];
 
     if (client >= maxclients->value) {
+        return false;
+    }
+
+    if (clientCommandIsModExploit(ent)) {
         return false;
     }
 
@@ -3119,7 +3150,7 @@ bool doClientCommand(edict_t *ent, int client, bool *checkforfloodafter) {
             return false;
         }
     } else if (motdFilename[0] && Q_stricmp(cmd, "motd") == 0) {
-        gi.centerprintf(ent, motd);
+        gi.centerprintf(ent, "%s", motd);
         return false;
     }
 

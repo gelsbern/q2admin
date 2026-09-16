@@ -115,7 +115,8 @@ void whois_adduser(int client, edict_t *ent) {
     }
     whois_details[WHOIS_COUNT].id = WHOIS_COUNT;
     q2a_strncpy(whois_details[WHOIS_COUNT].ip, IP(client), WHOISIPLEN-1);
-    q2a_strncpy(whois_details[WHOIS_COUNT].dyn[0].name, proxyinfo[client].name, WHOISNAMELEN-1);
+    Q_strlcpy(whois_details[WHOIS_COUNT].dyn[0].name,
+            proxyinfo[client].name, WHOISNAMELEN);
     proxyinfo[client].userid = WHOIS_COUNT;
     WHOIS_COUNT++;
 }
@@ -266,8 +267,8 @@ void whois_read_file(void) {
     }
 
     WHOIS_COUNT = 0;
-    while ((!feof(f)) && (WHOIS_COUNT < whois_active)) {
-        fscanf(f, "%i %s %s %s %s %s %s %s %s %s %s %s %s",
+    while (WHOIS_COUNT < whois_active &&
+            fscanf(f, "%i %49s %31s %15s %15s %15s %15s %15s %15s %15s %15s %15s %15s",
                 &whois_details[WHOIS_COUNT].id,
                 whois_details[WHOIS_COUNT].ip,
                 whois_details[WHOIS_COUNT].seen,
@@ -280,7 +281,7 @@ void whois_read_file(void) {
                 whois_details[WHOIS_COUNT].dyn[6].name,
                 whois_details[WHOIS_COUNT].dyn[7].name,
                 whois_details[WHOIS_COUNT].dyn[8].name,
-                whois_details[WHOIS_COUNT].dyn[9].name);
+                whois_details[WHOIS_COUNT].dyn[9].name) == 13) {
 
         //convert all � back to spaces
         temp_len = strlen(whois_details[WHOIS_COUNT].ip);
@@ -321,5 +322,5 @@ void whois_read_file(void) {
  */
 void reloadWhoisFileRun(int startarg, edict_t *ent, int client) {
     whois_read_file();
-    q2a_printf(ent, PRINT_HIGH, "whois file reloaded.\n");
+    gi.cprintf(ent, PRINT_HIGH, "whois file reloaded.\n");
 }

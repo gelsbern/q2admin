@@ -513,7 +513,7 @@ void run_vote(edict_t *ent, int client) {
         proxyinfo[client].clientcommand |= (CCMD_VOTEYES | CCMD_VOTED);
         q2a_strncpy(cmdvote, votecmd, sizeof(cmdvote)-1);
         q2a_strcat(cmdvote, "\n");
-        q2a_strncpy(votecaller, proxyinfo[client].name, sizeof(votecaller)-1);
+        Q_strlcpy(votecaller, proxyinfo[client].name, sizeof(votecaller));
         q2a_strcat(votecaller, "\n");
 
         displayVote();
@@ -566,7 +566,7 @@ void checkOnVoting(void) {
 
             if (percent >= ((double) votepasspercent / 100)) {
                 q2a_strcpy(printstr, "Vote PASSED!");
-                q2a_strncpy(cmdpassedvote, cmdvote, sizeof(cmdpassedvote)-1);
+                Q_strlcpy(cmdpassedvote, cmdvote, sizeof(cmdpassedvote));
                 addCmdQueue(-1, QCMD_RUNVOTECMD, 5, 0, 0);
             } else {
                 q2a_strcpy(printstr, "Vote FAILED!");

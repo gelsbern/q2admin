@@ -910,7 +910,7 @@ void CA_SayHello(void) {
 
     CA_WriteLong(MAGIC_CLIENT);
     CA_WriteByte(CMD_HELLO);
-    CA_WriteString(cloud_config.uuid);
+    CA_WriteString("%s", cloud_config.uuid);
     CA_WriteLong(Q2A_REVISION);
     CA_WriteShort(cloud.port);
     CA_WriteByte(cloud.maxclients);
@@ -1237,7 +1237,7 @@ void CA_Invite(uint8_t cl, const char *text) {
     CA_WriteByte(CMD_COMMAND);
     CA_WriteByte(CMD_COMMAND_INVITE);
     CA_WriteByte(cl);
-    CA_WriteString(text);
+    CA_WriteString("%s", text);
 }
 
 /**
@@ -1255,7 +1255,7 @@ void CA_Whois(uint8_t cl, const char *name) {
     CA_WriteByte(CMD_COMMAND);
     CA_WriteByte(CMD_COMMAND_WHOIS);
     CA_WriteByte(cl);
-    CA_WriteString(name);
+    CA_WriteString("%s", name);
 }
 
 /**
@@ -1315,7 +1315,7 @@ void CA_SayClient(void) {
         return;
     }
 
-    gi.cprintf(ent, level, string);
+    gi.cprintf(ent, level, "%s", string);
 }
 
 /**

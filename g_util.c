@@ -462,7 +462,7 @@ char *processString(char *output, char *input, int max, char end) {
                 timestamplen = q2a_strlen(timestampcp) - 1; // minus the \n
 
                 if (timestamplen && max >= timestamplen) {
-                    q2a_strncpy(output, timestampcp, timestamplen);
+                    q2a_memcpy(output, timestampcp, timestamplen);
                     output += timestamplen;
                     max -= (timestamplen - 1);
                 }
@@ -809,8 +809,6 @@ pathtype_t validatePath(const char *s) {
 void q2a_printf(char *fmt, ...) {
     char cbuffer[8192];
     va_list arglist;
-    char *cp;
-
     va_start(arglist, fmt);
     Q_vsnprintf(cbuffer, sizeof(cbuffer), fmt, arglist);
     va_end(arglist);

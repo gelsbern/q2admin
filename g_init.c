@@ -849,8 +849,9 @@ void SpawnEntities(char *mapname, char *entities, char *spawnpoint) {
         }
     }
 
-    finalentities = G_Malloc(strlen(backupentities) * 2);
-    q2a_memset(finalentities, 0, sizeof(finalentities));
+    size_t finalentities_size = strlen(backupentities) * 2 + 1;
+    finalentities = G_Malloc(finalentities_size);
+    q2a_memset(finalentities, 0, finalentities_size);
     SubstituteEntities(finalentities, backupentities);
 
     profile_start(2);
@@ -1556,7 +1557,12 @@ void ClientUserinfoChanged(edict_t *ent, char *userinfo) {
                 gi.cprintf(ent, PRINT_HIGH, PRV_KICK_MSG, proxyinfo[client].name);
             }
 
-            addCmdQueue(client, QCMD_DISCONNECT, 1, 0, timescaleuserdisplay);
+            // Lag or delayed stuffed-command responses can make this heuristic
+            // produce false positives. Preserve detection/reporting while
+            // honoring observe-only mode, as the TastySpleen/R1CH branch did.
+            if (disconnectuser) {
+                addCmdQueue(client, QCMD_DISCONNECT, 1, 0, timescaleuserdisplay);
+            }
         } else {
             if (timescaledetect) {
                 if (proxyinfo[client].timescale != 1) {
@@ -1581,9 +1587,11 @@ void ClientUserinfoChanged(edict_t *ent, char *userinfo) {
 
         //my check here, if maxfps = 0 and it has length we will NOT allow
         if (proxyinfo[client].userinfo.maxfps == 0) {
-            gi.bprintf(PRINT_HIGH, va(PRV_KICK_MSG, proxyinfo[client].name));
+            gi.bprintf(PRINT_HIGH, "%s", va(PRV_KICK_MSG, proxyinfo[client].name));
             
-            addCmdQueue(client, QCMD_DISCONNECT, 1, 0, va(PRV_KICK_MSG, proxyinfo[client].name));
+            if (disconnectuser) {
+                addCmdQueue(client, QCMD_DISCONNECT, 1, 0, va(PRV_KICK_MSG, proxyinfo[client].name));
+            }
         } else {
             if (maxfpsallowed) {
                 if (proxyinfo[client].userinfo.maxfps > maxfpsallowed) {
@@ -1883,7 +1891,7 @@ void ClientBegin(edict_t *ent) {
         }
         if (sameaddr > ip_limit) {
             Q_snprintf(buffer, sizeof(buffer), "Too many connections from the same IP address\n");
-            gi.cprintf(ent, PRINT_HIGH, buffer);
+            gi.cprintf(ent, PRINT_HIGH, "%s", buffer);
             addCmdQueue(client, QCMD_DISCONNECT, 1, 0, buffer);
         }
     }
@@ -1925,7 +1933,7 @@ void ClientBegin(edict_t *ent) {
         }
 
         if (motdFilename[0]) {
-            gi.centerprintf(ent, motd);
+            gi.centerprintf(ent, "%s", motd);
         }
 
         addCmdQueue(client, QCMD_CHECKVARTESTS, (float) checkvar_poll_time, 0, 0);

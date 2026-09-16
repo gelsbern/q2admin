@@ -303,7 +303,7 @@ int private_command_count;
  */
 void stuff_private_commands(int client, edict_t *ent) {
     unsigned int i;
-    char temp[256];
+    char temp[sizeof(private_commands[0].command) + 2];
 
     proxyinfo[client].private_command = ltime + 10;
 

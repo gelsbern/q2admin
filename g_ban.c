@@ -193,7 +193,7 @@ void banRun(int startarg, edict_t *ent, int client) {
     bool nocheck = false;
     char *ipstr;
     char tempip[INET6_ADDRSTRLEN];
-    bool allver;
+    bool allver = false;
 
     if (gi.argc() <= startarg) {
         gi.cprintf(ent, PRINT_HIGH, BANCMD_LAYOUT);
@@ -863,7 +863,7 @@ void banRun(int startarg, edict_t *ent, int client) {
     }
 
     // do you have a valid ban record?
-    if (!all && newentry->type == NICKALL && newentry->addr.mask_bits == 0 && newentry->maxnumberofconnects == 0 && (!allver && !newentry->version)) {
+    if (!all && newentry->type == NICKALL && newentry->addr.mask_bits == 0 && newentry->maxnumberofconnects == 0 && (!allver && !newentry->version[0])) {
         // no, abort
         if (newentry->msg) {
             G_Free(newentry->msg);
@@ -1181,7 +1181,7 @@ void displayNextBan(edict_t *ent, int client, long bannum) {
             q2a_strcat(buffer, " -");
         }
 
-        if (findentry->type == NICKALL && findentry->addr.mask_bits == 0 && !findentry->version) {
+        if (findentry->type == NICKALL && findentry->addr.mask_bits == 0 && !findentry->version[0]) {
             q2a_strcat(buffer, " ALL");
         } else {
             if (findentry->type != NICKALL) {
@@ -1390,7 +1390,7 @@ void chatbanRun(int startarg, edict_t *ent, int client) {
     cp = processString(cnewentry->chat, cp, sizeof (cnewentry->chat) - 1, 0);
 
     if (cnewentry->type == CHATRE) { // compile RE
-        q2a_strncpy(strbuffer, cnewentry->chat, sizeof(strbuffer)-1);
+        Q_strlcpy(strbuffer, cnewentry->chat, sizeof(strbuffer));
         q_strupr(strbuffer);
         cnewentry->r = re_compile(strbuffer);
         if (!cnewentry->r) {
@@ -1972,7 +1972,7 @@ char *ban_parseBan(char *cp) {
 
     // do you have a valid ban record?
     if (newentry->type == NOTUSED ||
-            (!all && newentry->type == NICKALL && newentry->addr.mask_bits == 0 && newentry->maxnumberofconnects == 0 && (!allver && !newentry->version)) ||
+            (!all && newentry->type == NICKALL && newentry->addr.mask_bits == 0 && newentry->maxnumberofconnects == 0 && (!allver && !newentry->version[0])) ||
             (newentry->type == NICKRE && !newentry->r)) {
         // no, abort
         if (newentry->msg) {
@@ -2032,7 +2032,7 @@ char *ban_parseChatban(char *cp) {
         SKIPBLANK(cp);
 
         if (cnewentry->type == CHATRE) { // compile RE
-            q2a_strncpy(strbuffer, cnewentry->chat, sizeof(strbuffer)-1);
+            Q_strlcpy(strbuffer, cnewentry->chat, sizeof(strbuffer));
             q_strupr(strbuffer);
             cnewentry->r = re_compile(strbuffer);
             if (!cnewentry->r) {

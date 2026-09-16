@@ -82,7 +82,7 @@ void FinishVPNLookup(download_t *download, int code, byte *buff, int len) {
 
         if (v->state == VPN_POSITIVE && vpn_kick) {
             Q_snprintf(buffer, sizeof(buffer), "VPN connections not allowed, please reconnect without it\n");
-            gi.cprintf(download->initiator, PRINT_HIGH, buffer);
+            gi.cprintf(download->initiator, PRINT_HIGH, "%s", buffer);
             addCmdQueue(i, QCMD_DISCONNECT, 1, 0, buffer);
         }
         if (ip_limit_vpn > 0 && proxyinfo[i].vpn.state == VPN_POSITIVE) {
@@ -97,7 +97,7 @@ void FinishVPNLookup(download_t *download, int code, byte *buff, int len) {
            }
            if (sameasn > ip_limit_vpn) {
                Q_snprintf(buffer, sizeof(buffer), "Too many connections from the same VPN provider\n");
-               gi.cprintf(proxyinfo[i].ent, PRINT_HIGH, buffer);
+               gi.cprintf(proxyinfo[i].ent, PRINT_HIGH, "%s", buffer);
                addCmdQueue(i, QCMD_DISCONNECT, 1, 0, buffer);
            }
         }

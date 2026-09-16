@@ -16,6 +16,7 @@ int num_bypasses = 0;
 void readAdminConfig(void) {
     FILE *f;
     char name[256];
+    char line[MAX_STRING_CHARS];
     int i, i2;
 
     Q_snprintf(name, sizeof(name), "%s/%s", moddir, configfile_login->string);
@@ -28,9 +29,10 @@ void readAdminConfig(void) {
     }
 
     i = 0;
-    while ((!feof(f)) && (i < MAX_ADMINS)) {
-        fscanf(f, "%s %s %d", admin_pass[i].name, admin_pass[i].password, &admin_pass[i].level);
-        if (admin_pass[i].level > 0) {
+    while (i < MAX_ADMINS && fgets(line, sizeof(line), f)) {
+        if (sscanf(line, "%255s %255s %d", admin_pass[i].name,
+                admin_pass[i].password, &admin_pass[i].level) == 3
+                && admin_pass[i].level > 0) {
             i++;
         }
     }
@@ -54,9 +56,10 @@ file2:
     }
 
     i = 0;
-    while ((!feof(f)) && (i < MAX_ADMINS)) {
-        fscanf(f, "%s %s %d", bypass_pass[i].name, bypass_pass[i].password, &bypass_pass[i].level);
-        if (bypass_pass[i].level > 0) {
+    while (i < MAX_ADMINS && fgets(line, sizeof(line), f)) {
+        if (sscanf(line, "%255s %255s %d", bypass_pass[i].name,
+                bypass_pass[i].password, &bypass_pass[i].level) == 3
+                && bypass_pass[i].level > 0) {
             i++;
         }
     }

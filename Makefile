@@ -108,7 +108,7 @@ ifdef CONFIG_WINDOWS
                -I/usr/i686-w64-mingw32/sys-root/mingw/include
     CFLAGS = -Wall -O3 -fno-strict-aliasing -g -MMD -DCURL_STATICLIB  $(INCLUDES)
 else
-    CFLAGS += -fPIC -ffast-math -w -DLINUX
+    CFLAGS += -fPIC -ffast-math -DLINUX
 endif
 
 CFLAGS += -DQ2A_COMMIT='"$(VER)"' -DQ2A_REVISION=$(REV) -DCPU='"$(CPU)"'

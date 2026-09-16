@@ -40,12 +40,12 @@ bool G_LoadKeys(void)
 {
     FILE *fp;
     cloud_connection_t *c = &cloud.connection;
-    char path[200];
+    char path[sizeof(moddir) + sizeof(cloud_config.private) + 2];
 
     gi.cprintf(NULL, PRINT_HIGH, "[cloud] loading encryption keys...");
 
     // first load our private key
-    sprintf(path, "%s/%s", moddir, cloud_config.private);
+    Q_snprintf(path, sizeof(path), "%s/%s", moddir, cloud_config.private);
     fp = fopen(path, "rb");
     if (!fp) {
         gi.cprintf(NULL, PRINT_HIGH, "failed, %s not found\n", path);
@@ -61,7 +61,7 @@ bool G_LoadKeys(void)
     }
 
     // then our public key
-    sprintf(path, "%s/%s", moddir, cloud_config.public);
+    Q_snprintf(path, sizeof(path), "%s/%s", moddir, cloud_config.public);
     fp = fopen(path, "rb");
     if (!fp) {
         gi.cprintf(NULL, PRINT_HIGH, "failed, %s not found\n", path);
@@ -80,7 +80,7 @@ bool G_LoadKeys(void)
     }
 
     // last the cloud admin server's public key
-    sprintf(path, "%s/%s", moddir, cloud_config.serverkey);
+    Q_snprintf(path, sizeof(path), "%s/%s", moddir, cloud_config.serverkey);
     fp = fopen(path, "rb");
     if (!fp) {
         gi.cprintf(NULL, PRINT_HIGH, "failed, %s not found\n", path);
